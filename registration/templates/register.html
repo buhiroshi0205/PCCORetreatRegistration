@@ -5,40 +5,54 @@
     Registration
 {% endblock %}
 
+{% block head %}
+<script type="text/javascript">
+  function addForm() {
+    numForms = Number($("#id_form-TOTAL_FORMS")[0].value);
+    lastForm = $("#id_form-" + (numForms-1) + "-container")[0];
+    newForm = lastForm.cloneNode(true);
+    newForm.id = "id_form-" + numForms + "-container";
+    newForm.innerHTML = newForm.innerHTML.replaceAll("form-" + (numForms-1), "form-" + numForms);
+    lastForm.after(newForm);
+    $("#id_form-TOTAL_FORMS")[0].value++;
+  }
+
+  function deleteForm(i) {
+    numForms = Number($("#id_form-TOTAL_FORMS")[0].value);
+    $("#id_form-" + i + "-container")[0].remove();
+    for (let j = i+1; j < numForms; j++) {
+      jthFormJQ = $("#id_form-" + j + "-container");
+      jthFormJQ[0].id = "id_form-" + (j-1) + "-container";
+      jthFormJQ.find("label").each(function() {
+        this.setAttribute("for", this.getAttribute("for").replace("form-" + j, "form-" + (j-1)));
+      })
+      jthFormJQ.find(":input").each(function() {
+        this.id = this.id.replace("form-" + j, "form-" + (j-1));
+        this.name = this.name.replace("form-" + j, "form-" + (j-1));
+      })
+    }
+    $("#id_form-TOTAL_FORMS")[0].value--;
+  }
+</script>
+{% endblock %}
 
 {% block content %}
 
+
 <form>
   {% csrf_token %}
-  <div class="form-group">
-    <label for="exampleFormControlInput1">Email address</label>
-    <input type="email" class="form-control" id="exampleFormControlInput1" placeholder="name@example.com">
-  </div>
-  <div class="form-group">
-    <label for="exampleFormControlSelect1">Example select</label>
-    <select class="form-control" id="exampleFormControlSelect1">
-      <option>1</option>
-      <option>2</option>
-      <option>3</option>
-      <option>4</option>
-      <option>5</option>
-    </select>
-  </div>
-  <div class="form-group">
-    <label for="exampleFormControlSelect2">Example multiple select</label>
-    <select multiple class="form-control" id="exampleFormControlSelect2">
-      <option>1</option>
-      <option>2</option>
-      <option>3</option>
-      <option>4</option>
-      <option>5</option>
-    </select>
-  </div>
-  <div class="form-group">
-    <label for="exampleFormControlTextarea1">Example textarea</label>
-    <textarea class="form-control" id="exampleFormControlTextarea1" rows="3"></textarea>
-  </div>
-  <button type="submit" class="btn btn-primary">Submit</button>
+  <p>Form 1</p>
+  {{ form }}
+  <p>Management<p>
+  {{ formset.management_form }}
+  <p>Form 2s</p>
+  {% for fm in formset %}
+    <div id="id_form-{{ forloop.counter0 }}-container">
+      {{ fm }}
+    </div>
+    <p>divider</p>
+  {% endfor %}
 </form>
+
 
 {% endblock %}
